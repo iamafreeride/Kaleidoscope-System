@@ -3,101 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>萬花筒系統 (Kaleidoscope) - 物理熵節點模擬</title>
+    <title>萬花筒系統 (Kaleidoscope) - 互動版</title>
     <style>
+        * { box-sizing: border-box; }
+        
         body {
             margin: 0;
             padding: 20px;
-            background-color: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
             color: #e2e8f0;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
+
         .container {
             background-color: #1e293b;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            max-width: 800px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            max-width: 1000px;
             width: 100%;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+        }
+
         h1 {
             font-size: 1.5rem;
-            margin-top: 0;
+            margin: 0;
             color: #38bdf8;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
         }
+
+        .theme-toggle {
+            background: #334155;
+            border: none;
+            color: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: #475569;
+        }
+
         canvas {
-            background-color: #000;
-            border: 1px solid #334155;
-            border-radius: 4px;
+            border: 2px solid #334155;
+            border-radius: 8px;
             width: 100%;
-            height: 400px;
+            height: 450px;
             display: block;
             margin-bottom: 20px;
+            cursor: crosshair;
+            background-color: #000;
+            box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1);
         }
+
+        .controls-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #93c5fd;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
         }
+
         .control-group {
             display: flex;
             flex-direction: column;
         }
-        label { margin-bottom: 8px; font-weight: bold; }
-        input[type="range"] { width: 100%; }
-        
+
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #334155;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: 2px solid #38bdf8;
+            background-color: #0f172a;
+            color: #38bdf8;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        button:hover {
+            background-color: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button.danger {
+            border-color: #f87171;
+            color: #f87171;
+        }
+
+        button.danger:hover {
+            background-color: #f87171;
+            color: #fff;
+        }
+
+        button.secondary {
+            border-color: #94a3b8;
+            color: #94a3b8;
+        }
+
+        button.secondary:hover {
+            background-color: #94a3b8;
+            color: #0f172a;
+        }
+
         .data-panel {
             background-color: #020617;
-            padding: 15px;
-            border-radius: 4px;
+            padding: 20px;
+            border-radius: 8px;
             border: 1px solid #334155;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
-        .status {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+
+        .stat-box {
+            border-left: 3px solid #38bdf8;
+            padding-left: 15px;
         }
-        .healthy { color: #4ade80; }
-        .degraded { color: #f87171; }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .healthy { color: #4ade80 !important; }
+        .healthy::before { content: "● "; }
+
+        .degraded { color: #f87171 !important; }
+        .degraded::before { content: "● "; }
+
+        .warning { color: #facc15 !important; }
+        .warning::before { content: "● "; }
+
         .hash-output {
             word-break: break-all;
-            color: #cbd5e1;
+            color: #64748b;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            padding: 12px;
+            background-color: #0f172a;
+            border-radius: 4px;
+            border-left: 3px solid #38bdf8;
+            margin-top: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .instructions {
+            background-color: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #4ade80;
+            margin-top: 20px;
             font-size: 0.9rem;
-            line-height: 1.5;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: #4ade80;
+        }
+
+        .status-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: #0f172a;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .theme-dark { --bg-primary: #0f172a; --bg-secondary: #1e293b; }
+        .theme-light { 
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #e2e8f0;
+            background-color: var(--bg-primary) !important;
+            color: #1e293b !important;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            canvas {
+                height: 300px;
+            }
+            header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
-<body>
+<body class="theme-dark">
 
 <div class="container">
-    <h1>萬花筒系統: 光學混沌腔體模擬</h1>
+    <header>
+        <h1>🎪 萬花筒系統: 光學混沌腔體</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 深色模式</button>
+    </header>
     
-    <canvas id="chaosChamber" width="800" height="400"></canvas>
-    
-    <div class="controls">
-        <div class="control-group">
-            <label for="windSlider">環境微擾 (風力/震動): <span id="windVal">50</span>%</label>
-            <input type="range" id="windSlider" min="0" max="100" value="50">
-        </div>
-        <div class="control-group">
-            <label for="lightSlider">光子注入強度: <span id="lightVal">100</span></label>
-            <input type="range" id="lightSlider" min="10" max="300" value="100">
+    <canvas id="chaosChamber" width="1000" height="450"></canvas>
+
+    <!-- 主要控制區 -->
+    <div class="controls-section">
+        <div class="section-title">⚙️ 系統參數調整</div>
+        <div class="controls">
+            <div class="control-group">
+                <label>環境微擾 (風力): <span id="windVal">50</span>%</label>
+                <input type="range" id="windSlider" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label>光子注入強度: <span id="lightVal">100</span></label>
+                <input type="range" id="lightSlider" min="10" max="300" value="100">
+            </div>
+            <div class="control-group">
+                <label>反射鏡數量: <span id="mirrorVal">15</span></label>
+                <input type="range" id="mirrorSlider" min="3" max="30" value="15">
+            </div>
+            <div class="control-group">
+                <label>粒子速度倍率: <span id="speedVal">1.0</span>x</label>
+                <input type="range" id="speedSlider" min="0.2" max="3" step="0.1" value="1.0">
+            </div>
         </div>
     </div>
 
-    <div class="data-panel">
-        <div class="status">
-            <span>節點狀態: <strong id="healthStatus" class="healthy">HEALTHY (混沌狀態良好)</strong></span>
-            <span>系統熵值 (Entropy): <strong id="entropyLevel">高</strong></span>
+    <!-- 互動區域 -->
+    <div class="controls-section">
+        <div class="section-title">🎮 互動控制</div>
+        <div class="button-group">
+            <button onclick="togglePause()"><span id="pauseBtn">⏸ 暫停</span></button>
+            <button class="secondary" onclick="resetSystem()">🔄 重置系統</button>
+            <button class="secondary" onclick="clearParticles()">🗑 清空粒子</button>
+            <button class="secondary" onclick="clearMirrors()">✨ 清空反射鏡</button>
+            <button class="secondary" onclick="randomizeAll()">🎲 隨機化</button>
+            <button class="secondary" onclick="slowMotion()">🐢 慢動作</button>
         </div>
-        <div>實時輸出種子碼 (模擬 SHA-256 白化):</div>
-        <div class="hash-output" id="hashOutput">等待初始化...</div>
+        <div style="margin-top: 15px; padding: 12px; background-color: #0f172a; border-radius: 6px; font-size: 0.9rem; color: #94a3b8;">
+            <strong style="color: #38bdf8;">💡 提示：</strong> 點擊畫布添加粒子 | 右鍵點擊添加反射鏡
+        </div>
+    </div>
+
+    <!-- 狀態監控 -->
+    <div class="controls-section">
+        <div class="section-title">📊 系統監控</div>
+        <div class="status-line">
+            <span>節點狀態: <strong id="healthStatus" class="healthy">HEALTHY</strong></span>
+            <span>系統熵值: <strong id="entropyLevel">高</strong></span>
+            <span>運行時間: <strong style="color: #38bdf8;" id="uptime">0秒</strong></span>
+            <span id="pauseIndicator" style="display:none; color: #facc15; font-weight: bold;">⏸ 已暫停</span>
+        </div>
+
+        <div class="data-panel">
+            <div class="stat-box">
+                <div class="stat-label">活躍粒子數</div>
+                <div class="stat-value" id="particleCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">反射鏡數量</div>
+                <div class="stat-value" id="mirrorCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">平均熵速率</div>
+                <div class="stat-value" id="entropyRate">0.00</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">系統溫度</div>
+                <div class="stat-value" id="temperature">0.0°</div>
+            </div>
+        </div>
+
+        <div class="hash-output">
+            <div style="color: #94a3b8; margin-bottom: 8px;">📡 實時輸出種子碼 (模擬 SHA-256 白化):</div>
+            <div id="hashOutput">等待初始化...</div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <strong>🎮 互動方式：</strong><br>
+        • <strong>左鍵點擊</strong>：添加新粒子 | <strong>右鍵點擊</strong>：添加旋轉反射鏡<br>
+        • 調整滑塊改變系統參數 | <strong>暫停</strong>：凍結模擬 | <strong>重置</strong>：回到初始狀態<br>
+        • 觀察熵值變化，當風力為 0 時系統會進入待機狀態
     </div>
 </div>
 
@@ -108,19 +379,56 @@
     // UI Elements
     const windSlider = document.getElementById('windSlider');
     const lightSlider = document.getElementById('lightSlider');
+    const mirrorSlider = document.getElementById('mirrorSlider');
+    const speedSlider = document.getElementById('speedSlider');
     const windVal = document.getElementById('windVal');
     const lightVal = document.getElementById('lightVal');
+    const mirrorVal = document.getElementById('mirrorVal');
+    const speedVal = document.getElementById('speedVal');
     const healthStatus = document.getElementById('healthStatus');
     const entropyLevel = document.getElementById('entropyLevel');
     const hashOutput = document.getElementById('hashOutput');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseIndicator = document.getElementById('pauseIndicator');
+    const uptimeDisplay = document.getElementById('uptime');
 
     // System Variables
     let particles = [];
     let reflectors = [];
     let lastHash = "";
     let stagnantFrames = 0;
+    let isPaused = false;
+    let startTime = Date.now();
+    let frameCount = 0;
+    let entropyHistory = [];
 
-    // Helper: Generate Mock Hash based on state
+    // Event Listeners for Sliders
+    windSlider.addEventListener('input', () => windVal.innerText = windSlider.value);
+    lightSlider.addEventListener('input', () => lightVal.innerText = lightSlider.value);
+    mirrorSlider.addEventListener('input', () => mirrorVal.innerText = mirrorSlider.value);
+    speedSlider.addEventListener('input', () => speedVal.innerText = parseFloat(speedSlider.value).toFixed(1));
+
+    // Canvas Click Events
+    canvas.addEventListener('click', (e) => {
+        if(isPaused) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        for(let i = 0; i < 5; i++) {
+            particles.push(new Particle(x, y));
+        }
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if(isPaused) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        reflectors.push(new Reflector(x, y));
+    });
+
+    // Helper: Generate Mock Hash
     function generateMockHash(stateString) {
         let hash = 0;
         for (let i = 0; i < stateString.length; i++) {
@@ -128,7 +436,6 @@
             hash = ((hash << 5) - hash) + char;
             hash = hash & hash;
         }
-        // Convert to a pseudo-SHA256 looking string
         let hex = Math.abs(hash).toString(16).padStart(8, '0');
         while(hex.length < 64) {
             hex += Math.random().toString(16).substring(2, 10);
@@ -136,34 +443,39 @@
         return hex.substring(0, 64);
     }
 
-    // Classes
+    // Particle Class
     class Particle {
-        constructor() {
-            this.x = canvas.width / 2;
-            this.y = canvas.height / 2;
+        constructor(x = null, y = null) {
+            this.x = x !== null ? x : canvas.width / 2;
+            this.y = y !== null ? y : canvas.height / 2;
             this.vx = (Math.random() - 0.5) * 5;
             this.vy = (Math.random() - 0.5) * 5;
             this.life = 1.0;
+            this.color = `hsl(${Math.random() * 60 + 180}, 100%, 50%)`;
         }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
+
+        update(speedMult) {
+            this.x += this.vx * speedMult;
+            this.y += this.vy * speedMult;
             
-            // Wall bounce
             if (this.x <= 0 || this.x >= canvas.width) this.vx *= -1;
             if (this.y <= 0 || this.y >= canvas.height) this.vy *= -1;
 
             this.x = Math.max(0, Math.min(canvas.width, this.x));
             this.y = Math.max(0, Math.min(canvas.height, this.y));
         }
+
         draw() {
-            ctx.fillStyle = 'rgba(125, 211, 252, 0.8)';
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = 0.8;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
             ctx.fill();
+            ctx.globalAlpha = 1.0;
         }
     }
 
+    // Reflector Class
     class Reflector {
         constructor(x, y) {
             this.x = x;
@@ -171,23 +483,37 @@
             this.angle = Math.random() * Math.PI * 2;
             this.length = 30 + Math.random() * 40;
             this.spinSpeed = (Math.random() - 0.5) * 0.1;
+            this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
         }
+
         update(windModifier) {
             this.angle += this.spinSpeed * windModifier;
         }
+
         draw() {
-            ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+            ctx.strokeStyle = this.color;
             ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.8;
             ctx.beginPath();
             ctx.moveTo(this.x - Math.cos(this.angle) * this.length/2, this.y - Math.sin(this.angle) * this.length/2);
             ctx.lineTo(this.x + Math.cos(this.angle) * this.length/2, this.y + Math.sin(this.angle) * this.length/2);
             ctx.stroke();
+            ctx.globalAlpha = 1.0;
+
+            // Draw center point
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
-    // Initialization
+    // Initialize System
     function init() {
-        for(let i=0; i<15; i++) {
+        particles = [];
+        reflectors = [];
+        const targetMirrors = parseInt(mirrorSlider.value);
+        for(let i = 0; i < targetMirrors; i++) {
             reflectors.push(new Reflector(
                 50 + Math.random() * (canvas.width - 100), 
                 50 + Math.random() * (canvas.height - 100)
@@ -195,71 +521,148 @@
         }
     }
 
+    // Control Functions
+    function togglePause() {
+        isPaused = !isPaused;
+        pauseBtn.innerText = isPaused ? '▶ 繼續' : '⏸ 暫停';
+        pauseIndicator.style.display = isPaused ? 'block' : 'none';
+    }
+
+    function resetSystem() {
+        init();
+        stagnantFrames = 0;
+        entropyHistory = [];
+        startTime = Date.now();
+    }
+
+    function clearParticles() {
+        particles = [];
+    }
+
+    function clearMirrors() {
+        reflectors = [];
+    }
+
+    function randomizeAll() {
+        windSlider.value = Math.floor(Math.random() * 100);
+        lightSlider.value = 50 + Math.floor(Math.random() * 150);
+        mirrorSlider.value = 5 + Math.floor(Math.random() * 20);
+        speedSlider.value = (0.5 + Math.random() * 1.5).toFixed(1);
+        windVal.innerText = windSlider.value;
+        lightVal.innerText = lightSlider.value;
+        mirrorVal.innerText = mirrorSlider.value;
+        speedVal.innerText = parseFloat(speedSlider.value).toFixed(1);
+    }
+
+    function slowMotion() {
+        speedSlider.value = 0.2;
+        speedVal.innerText = '0.2';
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('theme-light');
+        const btn = document.querySelector('.theme-toggle');
+        if(document.body.classList.contains('theme-light')) {
+            btn.innerText = '☀️ 淺色模式';
+            canvas.style.backgroundColor = '#f5f5f5';
+        } else {
+            btn.innerText = '🌙 深色模式';
+            canvas.style.backgroundColor = '#000';
+        }
+    }
+
     // Animation Loop
     function animate() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Trajectory effect
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(!isPaused) {
+            const alpha = document.body.classList.contains('theme-light') ? 0.05 : 0.2;
+            ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const wind = parseInt(windSlider.value) / 50; // 0 to 2
-        const targetLight = parseInt(lightSlider.value);
+            const wind = parseInt(windSlider.value) / 50;
+            const targetLight = parseInt(lightSlider.value);
+            const targetMirrors = parseInt(mirrorSlider.value);
+            const speedMult = parseFloat(speedSlider.value);
 
-        windVal.innerText = windSlider.value;
-        lightVal.innerText = targetLight;
+            // Manage particle count
+            while(particles.length < targetLight) particles.push(new Particle());
+            while(particles.length > targetLight) particles.pop();
 
-        // Manage particle count
-        while(particles.length < targetLight) particles.push(new Particle());
-        while(particles.length > targetLight) particles.pop();
+            // Manage mirror count
+            while(reflectors.length < targetMirrors) {
+                reflectors.push(new Reflector(
+                    50 + Math.random() * (canvas.width - 100),
+                    50 + Math.random() * (canvas.height - 100)
+                ));
+            }
+            while(reflectors.length > targetMirrors) reflectors.pop();
 
-        // Update Physics
-        let stateSnapshot = "";
-        
-        reflectors.forEach(r => {
-            r.update(wind);
-            r.draw();
-            stateSnapshot += `${Math.round(r.angle*100)}`;
-        });
+            let stateSnapshot = "";
+            let avgVelocity = 0;
 
-        particles.forEach(p => {
-            // Pseudo collision detection (deflection based on proximity to reflectors)
             reflectors.forEach(r => {
-                const dist = Math.hypot(p.x - r.x, p.y - r.y);
-                if(dist < r.length / 2) {
-                    p.vx += (Math.random() - 0.5) * 2;
-                    p.vy += (Math.random() - 0.5) * 2;
-                }
+                r.update(wind);
+                r.draw();
+                stateSnapshot += `${Math.round(r.angle*100)}`;
             });
 
-            // Speed limit
-            const speed = Math.hypot(p.vx, p.vy);
-            if(speed > 6) { p.vx *= 0.8; p.vy *= 0.8; }
-            if(speed < 1) { p.vx *= 1.2; p.vy *= 1.2; }
+            particles.forEach(p => {
+                reflectors.forEach(r => {
+                    const dist = Math.hypot(p.x - r.x, p.y - r.y);
+                    if(dist < r.length / 2 + 10) {
+                        p.vx += (Math.random() - 0.5) * 2;
+                        p.vy += (Math.random() - 0.5) * 2;
+                    }
+                });
 
-            p.update();
-            p.draw();
-            stateSnapshot += `${Math.round(p.x)}${Math.round(p.y)}`;
-        });
+                const speed = Math.hypot(p.vx, p.vy);
+                avgVelocity += speed;
+                if(speed > 6) { p.vx *= 0.8; p.vy *= 0.8; }
+                if(speed < 1) { p.vx *= 1.2; p.vy *= 1.2; }
 
-        // Entropy Health Check
-        if (wind === 0) {
-            stagnantFrames++;
-        } else {
-            stagnantFrames = 0;
+                p.update(speedMult);
+                p.draw();
+                stateSnapshot += `${Math.round(p.x)}${Math.round(p.y)}`;
+            });
+
+            // Entropy calculation
+            avgVelocity = particles.length > 0 ? avgVelocity / particles.length : 0;
+            entropyHistory.push(avgVelocity);
+            if(entropyHistory.length > 60) entropyHistory.shift();
+
+            // Health Check
+            if (wind === 0) {
+                stagnantFrames++;
+            } else {
+                stagnantFrames = 0;
+            }
+
+            if (stagnantFrames > 60) {
+                healthStatus.className = "degraded";
+                healthStatus.innerText = "DEGRADED";
+                entropyLevel.innerText = "極低";
+            } else if (wind < 0.3) {
+                healthStatus.className = "warning";
+                healthStatus.innerText = "WARNING";
+                entropyLevel.innerText = "中等";
+            } else {
+                healthStatus.className = "healthy";
+                healthStatus.innerText = "HEALTHY";
+                entropyLevel.innerText = "高";
+                const currentHash = generateMockHash(stateSnapshot);
+                hashOutput.innerText = currentHash;
+            }
+
+            // Update stats
+            document.getElementById('particleCount').innerText = particles.length;
+            document.getElementById('mirrorCount').innerText = reflectors.length;
+            const avgEntropy = entropyHistory.length > 0 ? (entropyHistory.reduce((a,b) => a+b) / entropyHistory.length).toFixed(2) : '0.00';
+            document.getElementById('entropyRate').innerText = avgEntropy;
+            document.getElementById('temperature').innerText = (avgVelocity * 10).toFixed(1);
         }
 
-        if (stagnantFrames > 60) {
-            healthStatus.className = "degraded";
-            healthStatus.innerText = "DEGRADED (缺乏物理微擾，輸出凍結)";
-            entropyLevel.innerText = "極低 (跌破安全閾值)";
-            // Stop updating hash to simulate node exclusion
-        } else {
-            healthStatus.className = "healthy";
-            healthStatus.innerText = "HEALTHY (混沌狀態良好)";
-            entropyLevel.innerText = "高";
-            
-            // Generate and display new hash
-            const currentHash = generateMockHash(stateSnapshot);
-            hashOutput.innerText = currentHash;
-        }
+        frameCount++;
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        uptimeDisplay.innerText = elapsed + '秒';
 
         requestAnimationFrame(animate);
     }
@@ -267,5 +670,6 @@
     init();
     animate();
 </script>
+
 </body>
 </html>
