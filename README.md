@@ -4,6 +4,8 @@
 
 ---
 
+https://iamafreeride.github.io/Kaleidoscope-System/
+
 # Overview
 
 The Kaleidoscope System is a physical entropy generation architecture that utilizes optical chaos, environmental perturbations, and distributed sensing nodes to continuously generate high-entropy data.
