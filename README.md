@@ -282,7 +282,3 @@ Future work may include:
 * Distributed node synchronization
 
 ---
-
-# License
-
-To be determined.
